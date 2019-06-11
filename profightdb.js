@@ -2,6 +2,7 @@
 const tabletojson = require('tabletojson');
 const fs = require('fs');
 const json2csv = require('json2csv').parse;
+
 var urlBase = "http://www.profightdb.com/atoz.html?term=";
 var urlMid = "&start=";
 var letters = [];
@@ -15,6 +16,4 @@ letters.forEach(function(v) {
     }
 });
 
-linkList.forEach(function(v) {
-    console.log(v);
-});
+console.log("We got the links!");
