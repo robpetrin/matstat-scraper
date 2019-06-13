@@ -1,15 +1,18 @@
 'use strict';
 const fs = require('fs'),
     cheerio = require('cheerio'),
-    request = require('request');
+    request = require('request'),
+    ObjectsToCsv = require('objects-to-csv'),
+    urlBase = "http://www.profightdb.com/atoz.html?term=",
+    urlMid = "&start=";
+var linkList = [],
+    letters = [],
+    performerList = [];
 
-var urlBase = "http://www.profightdb.com/atoz.html?term=";
-var urlMid = "&start=";
-var letters = [];
+// (1) Populate letters array with entire alphabet
 for (var i = 97; i <= 122; i++) { letters.push(String.fromCodePoint(i)) }
-var linkList = [];
 
-// (A) Cultivate A-Z link list of performers, genders, DOB, POB, and notes
+// (2) Cultivate A-Z link list of performers, genders, DOB, POB, and notes
 
 letters.forEach(function(v) {
     for (let i = 0; i < 22; i++) {
@@ -18,35 +21,33 @@ letters.forEach(function(v) {
     }
 });
 
-// (B) 
+// (3) Make a request per letter, through each page, and write to objects within a master array
 
-request('http://profightdb.com/atoz.html?term=b&start=200', function(error, response, html) {
-    if (!error && response.statusCode == 200) {
-        var $ = cheerio.load(html);
-        var genderList = []
-        $('tr.gray').each(function(i, element) {
-            genderList.push($(this).first('td').first('img').attr('alt'));
-            // var a = $(this).prev();
-            // var rank = a.parent().parent().text();
-            // var title = a.text();
-            // var url = a.attr('href');
-            // var subtext = a.parent().parent().next().children('.subtext').children();
-            // var points = $(subtext).eq(0).text();
-            // var username = $(subtext).eq(1).text();
-            // var comments = $(subtext).eq(2).text();
-            // // Our parsed meta data object
-            // var metadata = {
-            //     rank: parseInt(rank),
-            //     title: title,
-            //     url: url,
-            //     points: parseInt(points),
-            //     username: username,
-            //     comments: parseInt(comments)
-            // };
-            // console.log(metadata);
-        console.log(genderList.length);
-        });
-    }
+linkList.forEach(function(v) {
+    request(v, function(error, response, html) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(html);
+            $('tr.gray').each(function(i, element) {
+                var gender = $(this).find(">:first-child").find('img').attr('alt');
+                var ringName = [$(this).find(">:first-child").find('img').next().text()];
+                var performerURL = $(this).find(">:first-child").find('img').next().attr('href')
+                var dob = $(this).find(">:nth-child(2)").text();
+                var pob = $(this).find(">:nth-child(3)").text();
+                var notes = $(this).find(">:nth-child(4)").text();
+                // Passing to a Performer Object
+                var performers = {
+                    ringName: ringName,
+                    URL: performerURL,
+                    dob: dob,
+                    pob: pob,
+                    gender: gender,
+                    notes: notes
+                };
+                // Pushing new performer to array of performers
+                performerList.push(performers);
+            });
+        }
+        new ObjectsToCsv(performerList).toDisk('./performers.csv');
+        console.log(performerList.length + " performers written to performers.csv")
+    });
 });
-
-console.log(linkList.length + " links added to the list!");
