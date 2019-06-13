@@ -15,7 +15,7 @@ for (var i = 97; i <= 122; i++) { letters.push(String.fromCodePoint(i)) }
 // (2) Cultivate A-Z link list of performers, genders, DOB, POB, and notes
 
 letters.forEach(function(v) {
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < 23; i++) {
         var fullURL = urlBase + v + urlMid + (i * 100).toString();
         linkList.push(fullURL);
     }
