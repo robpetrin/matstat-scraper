@@ -1,13 +1,17 @@
 'use strict';
 const fs = require('fs'),
+    chalk = require('chalk'),
     cheerio = require('cheerio'),
-    request = require('request'),
+    limit = require("simple-rate-limiter"),
+    request = limit(require("request")).to(50).per(10000),
     ObjectsToCsv = require('objects-to-csv'),
     urlBase = "http://www.profightdb.com/atoz.html?term=",
     urlMid = "&start=";
 var linkList = [],
     letters = [],
-    performerList = [];
+    performerList = [],
+    counter = 0,
+    linkCount = 0;
 
 // (1) Populate letters array with entire alphabet
 for (var i = 97; i <= 122; i++) { letters.push(String.fromCodePoint(i)) }
@@ -22,15 +26,14 @@ letters.forEach(function(v) {
 });
 
 // (3) Make a request per letter, through each page, and write to objects within a master array
-
-linkList.forEach(function(v) {
-    request(v, function(error, response, html) {
+linkList.forEach(async function(v) {
+    await request(v, function(error, response, html) {
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(html);
             $('tr.gray').each(function(i, element) {
                 var gender = $(this).find(">:first-child").find('img').attr('alt');
                 var ringName = [$(this).find(">:first-child").find('img').next().text()];
-                var performerURL = $(this).find(">:first-child").find('img').next().attr('href')
+                var performerURL = $(this).find(">:first-child").find('img').next().attr('href') + '?res=2000';
                 var dob = $(this).find(">:nth-child(2)").text();
                 var pob = $(this).find(">:nth-child(3)").text();
                 var notes = $(this).find(">:nth-child(4)").text();
@@ -45,9 +48,13 @@ linkList.forEach(function(v) {
                 };
                 // Pushing new performer to array of performers
                 performerList.push(performers);
+                counter++;
+                console.log(chalk.bgHex('#000080').white("Done with performer #" + counter + "."));
             });
         }
-        new ObjectsToCsv(performerList).toDisk('./performers.csv');
-        console.log(performerList.length + " performers written to performers.csv")
+        linkCount++;
+        console.log(chalk.bgHex('#d7182a').white("Done with link " + linkCount + " of 598."));
+        new ObjectsToCsv(performerList).toDisk('./performers-initial.csv');
+        console.log(chalk.hex('#000080').bgWhite(performerList.length + " performers written to performers.csv"));
     });
 });
