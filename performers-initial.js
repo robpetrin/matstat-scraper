@@ -4,7 +4,6 @@ const fs = require('fs'),
     cheerio = require('cheerio'),
     limit = require("simple-rate-limiter"),
     request = limit(require("request")).to(50).per(10000),
-    ObjectsToCsv = require('objects-to-csv'),
     jsonfile = require('jsonfile'),
     urlBase = "http://www.profightdb.com/atoz.html?term=",
     urlMid = "&start=";
@@ -62,6 +61,4 @@ linkList.forEach(async function(v) {
         linkCount++;
         console.log(chalk.bgHex('#d7182a').white("Done with link #" + linkCount));
     });
-    new ObjectsToCsv(performerList).toDisk('./exports/performers-initial.csv');
-    console.log(chalk.hex('#000080').bgWhite(performerList.length + " performers written to performers.csv"));
 });
