@@ -13,8 +13,9 @@ fs.writeFile('./exports/performers-detail.json', '', function() { console.log('J
 console.log(initialList)
 
 // (3) Make a request per letter, through each page, and write to objects within a master array
-linkList.forEach(async function(v) {
-    await request(v, function(error, response, html) {
+linkList.forEach(function(v, index) {
+    request(v, function(error, response, html) {
+        console.log(v.index);
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(html);
             $('tr.gray').each(function(i, element) {
@@ -39,6 +40,7 @@ linkList.forEach(async function(v) {
                     if (err) console.error(err)
                 })
                 counter++;
+                console.log(v.index);
                 console.log(chalk.hex('#fff').bgHex('#002244')("Done with performer #" + counter + ", added to performers-detail.json"));
             });
         }
