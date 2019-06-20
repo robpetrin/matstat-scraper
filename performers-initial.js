@@ -13,9 +13,8 @@ var linkList = [],
     counter = 0,
     linkCount = 0;
 
-// (0) Ensure the JSON file is empty, and appropriate opening for JSON file
+// (0) Ensure the JSON file is empty
 fs.writeFile('./exports/performers-initial.json', '', function() { console.log('JSON file emptied.') })
-jsonfile.writeFile('./exports/performers-initial.json', '{', { flag: 'a' }, function(err) { if (err) console.error(err) });
 
 // (1) Populate letters array with entire alphabet
 for (var i = 97; i <= 122; i++) { letters.push(String.fromCodePoint(i)) };
@@ -52,16 +51,11 @@ linkList.forEach(async function(v) {
                 };
                 // Pushing new performer to array of performers
                 performerList.push(performers);
-                jsonfile.writeFile('./exports/performers-initial.json', performers, { flag: 'a' }, function(err) { if (err) console.error(err) });
-                jsonfile.writeFile('./exports/performers-initial.json', ',', { flag: 'a' }, function(err) { if (err) console.error(err) });
+                //jsonfile.writeFile('./exports/performers-initial.json', performerList, { flag: 'a' }, function(err) { if (err) console.error(err) });
                 counter++;
                 console.log(chalk.bgHex('#000080').white("Done with performer #" + counter + "."));
             });
         }
-        linkCount++;
-        console.log(chalk.bgHex('#d7182a').white("Done with link #" + linkCount));
     });
 });
-
-// (4) Appropriate closure for JSON file
-jsonfile.writeFile('./exports/performers-initial.json', '}', { flag: 'a' }, function(err) { if (err) console.error(err) });
+jsonfile.writeFile('./exports/performers-initial.json', performerList, { flag: 'a' }, function(err) { if (err) console.error(err) });
