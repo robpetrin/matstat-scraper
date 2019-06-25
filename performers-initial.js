@@ -32,26 +32,14 @@ function getLinks() {
 
 }
 
-// (3) Manage my JSON file, whether or not it exists.
-function writePerformers() {
-    // (3.1) Empty the JSON file if it exists
-    fs.writeFile('./exports/performers-initial.json', '', function() {
-        console.log('JSON file emptied.')
-    });
-
-    // (3.2) Write array performerList to JSON file
-    jsonfile.writeFile('./exports/performers-initial.json', performerList, { flag: 'a' }, function(err) { if (err) console.error(err) });
-    console.log("I should be the final line you see.");
-}
-
-// (4) Make a request per letter, through each page, and write to objects within a master array
+// (3) Make a request per letter, through each page, and write to objects within a master array
 async function getPerformers() {
     await linkList.forEach(function(v) {
-        // (4.1) Make an HTTP request for each link in my list...
+        // (3.1) Make an HTTP request for each link in my list...
         request(v, function(error, response, html) {
             if (!error && response.statusCode == 200) {
                 var $ = cheerio.load(html);
-                // (4.2) Make a request
+                // (3.2) Make a request
                 $('tr.gray').each(function(i, element) {
                     var gender = $(this).find(">:first-child").find('img').attr('alt');
                     var ringName = [$(this).find(">:first-child").find('img').next().text()];
@@ -59,7 +47,7 @@ async function getPerformers() {
                     var dob = $(this).find(">:nth-child(2)").text();
                     var pob = $(this).find(">:nth-child(3)").text();
                     var notes = $(this).find(">:nth-child(4)").text();
-                    // (4.3) Get all of the above table rows and push to an object
+                    // (3.3) Get all of the above table rows and push to an object
                     var performers = {
                         ringName: ringName,
                         URL: performerURL,
@@ -68,7 +56,7 @@ async function getPerformers() {
                         gender: gender,
                         notes: notes
                     };
-                    // (4.4) Push new performer object to array of performers
+                    // (3.4) Push new performer object to array of performers
                     performerList.push(performers);
                     counter++;
                     console.log(chalk.bgHex('#000080').white("Done with performer #" + counter + "."));
@@ -77,6 +65,19 @@ async function getPerformers() {
         });
     });
 }
+
+// (4) Manage my JSON file, whether or not it exists.
+function writePerformers() {
+    // (4.1) Empty the JSON file if it exists
+    fs.writeFile('./exports/performers-initial.json', '', function() {
+        console.log('JSON file emptied.')
+    });
+
+    // (4.2) Write array performerList to JSON file
+    jsonfile.writeFile('./exports/performers-initial.json', performerList, { flag: 'a' }, function(err) { if (err) console.error(err) });
+    console.log("I should be the final line you see.");
+}
+
 
 // (5) Run the request to get my array of objects, then write them to the JSON file.
 getLinks();
