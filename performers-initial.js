@@ -4,7 +4,7 @@ const fs = require('fs'),
     chalk = require('chalk'),
     cheerio = require('cheerio'),
     limit = require("simple-rate-limiter"),
-    request = limit(require("request")).to(50).per(10000),
+    request = limit(require("request")).to(25).per(1000),
     jsonfile = require('jsonfile');
 
 const urlBase = "http://www.profightdb.com/atoz.html?term=",
@@ -81,6 +81,5 @@ function writePerformers() {
 
 // (5) Run the request to get my array of objects, then write them to the JSON file.
 getLinks();
-getPerformers().then(writePerformers());
-
-// (6) writePerformers runs before getPerformers so I end up with an empty array.
+getPerformers().then(
+    setTimeout(writePerformers, 90000));
